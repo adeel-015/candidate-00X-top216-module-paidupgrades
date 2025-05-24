@@ -7,7 +7,7 @@ const App = () => {
   const handleUpgrade = async (tier) => {
     const amount = tier === 'boost' ? 900 : 4900;
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/create-upgrade-session`, {
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/create-upgrade-session`, {
         finalistId: 'FIN_123',
         tier,
         amount
