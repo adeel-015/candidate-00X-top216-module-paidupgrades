@@ -1,19 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const App = () => {
   const [message, setMessage] = useState('');
 
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5050';
+  const STRIPE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+
+  useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const success = params.get('success');
+  const sessionId = params.get('session_id');
+  const canceled = params.get('canceled');
+
+  if (success && sessionId) {
+    setMessage(`✅ You’re featured! (${sessionId})`);
+  } else if (canceled) {
+    setMessage("❌ Payment failed – please try again.");
+  }
+
+  // 🔥 Clear the query params from the URL
+  if (success || canceled) {
+    const newUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, '', newUrl);
+  }
+}, []);
+
   const handleUpgrade = async (tier) => {
     const amount = tier === 'boost' ? 900 : 4900;
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/create-upgrade-session`, {
+      const res = await axios.post(`${API_BASE}/api/create-upgrade-session`, {
         finalistId: 'FIN_123',
         tier,
         amount
       });
-      console.log('Mock Stripe Session ID:', res.data.sessionId);
-      setMessage(`✅ You're featured! (mock stripe_session_id: ${res.data.sessionId})`);
+
+      const sessionId = res.data.sessionId;
+
+      if (window.Stripe) {
+        const stripe = window.Stripe(STRIPE_KEY);
+        await stripe.redirectToCheckout({ sessionId });
+      } else {
+        console.log("Mock Mode – Stripe not available. Session:", sessionId);
+        setMessage(`✅ You’re featured! ${sessionId})`);
+      }
     } catch (err) {
       console.error(err);
       setMessage('❌ Payment failed – please try again.');
@@ -39,7 +69,10 @@ const App = () => {
             Premium – $49
           </button>
         </div>
-        {message && <div className="mt-6 text-lg font-medium">{message}</div>}
+        {message && (
+          <div className="mt-6 text-lg font-medium break-words max-w-full overflow-auto">
+            {message}
+          </div>)}
       </div>
     </div>
   );
