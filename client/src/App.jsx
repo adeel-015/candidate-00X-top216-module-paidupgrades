@@ -19,7 +19,7 @@ const App = () => {
     setMessage("❌ Payment failed – please try again.");
   }
 
-  // 🔥 Clear the query params from the URL
+
   if (success || canceled) {
     const newUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, '', newUrl);
