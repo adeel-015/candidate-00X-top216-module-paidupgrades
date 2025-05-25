@@ -1,20 +1,24 @@
-# Global ignores
+# Node modules
 node_modules/
-dist/
-.env
-.DS_Store
-
-# Vite (frontend)
 client/node_modules/
+server/node_modules/
+
+# Build outputs
+dist/
 client/dist/
 
-# Express (backend)
-server/node_modules/
+# Environment files
+.env
+client/.env
+server/.env
+
+# macOS system files
+.DS_Store
 
 # Logs
 logs/
 *.log
 
-# IDE configs
+# IDE/config files
 .vscode/
 .idea/
